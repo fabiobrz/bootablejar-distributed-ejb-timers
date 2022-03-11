@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.jboss.eap.qe.examples</groupId>
+  <artifactId>bootablejar-json-logging-example</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>war</packaging>
+
+  <name>Bootable JAR - Distributed EJB Timers Webapp</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://localhost:8080/hello</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+
+    <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
+    <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
+    <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
+    <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
+    <maven.war.plugin.version>3.3.1</maven.war.plugin.version>
+    <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
+    <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
+
+    <bootable.jar.maven.plugin.version>6.1.2.Final</bootable.jar.maven.plugin.version>
+    <jboss.xp.galleon.feature.pack.version>27.0.0.Beta1-SNAPSHOT</jboss.xp.galleon.feature.pack.version>
+    <jboss.xp.galleon.feature.pack.groupid>org.wildfly</jboss.xp.galleon.feature.pack.groupid>
+    <jboss.version>27.0.0.Beta1-SNAPSHOT</jboss.version>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>wildfly</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <!-- WildFly Jakarta EE 8 BOM  -->
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.jboss.spec.javax.ws.rs</groupId>
+            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+            <version>2.0.2.Final</version>
+          </dependency>
+          <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.4.3.Final</version>
+          </dependency>
+          <!--<dependency>
+            <groupId>org.wildfly.bom</groupId>
+            <artifactId>wildfly-jakartaee8</artifactId>
+            <version>${jboss.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>-->
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+    <!--<profile>
+      <id>eap</id>
+      <activation>
+        <property>
+          <name>eap</name>
+        </property>
+      </activation>
+      <properties>
+        <bootable.jar.maven.plugin.version>2.0.2.Final-redhat-00001</bootable.jar.maven.plugin.version>
+        <jboss.xp.galleon.feature.pack.version>2.0.0.GA-redhat-00002</jboss.xp.galleon.feature.pack.version>
+        <jboss.xp.galleon.feature.pack.groupid>org.jboss.eap</jboss.xp.galleon.feature.pack.groupid>
+        <jboss.version>7.3.4.GA</jboss.version>
+      </properties>
+      &lt;!&ndash; JBoss Maven repos &ndash;&gt;
+      <repositories>
+        <repository>
+          <id>jboss</id>
+          <url>https://maven.repository.redhat.com/ga</url>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>jboss</id>
+          <url>https://maven.repository.redhat.com/ga</url>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+      &lt;!&ndash; JBoss Jakarta EE 8 BOM &ndash;&gt;
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.jboss.bom</groupId>
+            <artifactId>jboss-eap-jakartaee8</artifactId>
+            <version>${jboss.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>-->
+  </profiles>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.spec.javax.ws.rs</groupId>
+      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>ditributed-ejb-timers</finalName>
+<!--    <plugins>-->
+<!--      <plugin>-->
+<!--        <groupId>org.wildfly.plugins</groupId>-->
+<!--        <artifactId>wildfly-jar-maven-plugin</artifactId>-->
+<!--        <version>${bootable.jar.maven.plugin.version}</version>-->
+<!--        <configuration>-->
+<!--          <feature-packs>-->
+<!--            <feature-pack>-->
+<!--              <location>${jboss.xp.galleon.feature.pack.groupid}:wildfly-galleon-pack:${jboss.xp.galleon.feature.pack.version}</location>-->
+<!--            </feature-pack>-->
+<!--          </feature-packs>-->
+<!--          <layers>-->
+<!--            <layer>jaxrs-server</layer>-->
+<!--          </layers>-->
+<!--          &lt;!&ndash;<cli-sessions>-->
+<!--            <cli-session>-->
+<!--              <script-files>-->
+<!--                <script>scripts/logging.cli</script>-->
+<!--              </script-files>-->
+<!--            </cli-session>-->
+<!--          </cli-sessions>&ndash;&gt;-->
+<!--        </configuration>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <goals>-->
+<!--              <goal>package</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
+<!--    </plugins>-->
+
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${maven.clean.plugin.version}</version>
+        </plugin>
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_war_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven.resources.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven.compiler.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>${maven.war.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${maven.install.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${maven.deploy.plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
