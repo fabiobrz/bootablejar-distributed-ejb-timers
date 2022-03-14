@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jboss.eap.qe.examples</groupId>
-  <artifactId>bootablejar-json-logging-example</artifactId>
+  <artifactId>bootablejar-distributed-ejb-timers</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
@@ -15,8 +15,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
 
     <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
     <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
@@ -25,87 +25,100 @@
     <maven.war.plugin.version>3.3.1</maven.war.plugin.version>
     <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
+    <junit.version>4.11</junit.version>
 
     <bootable.jar.maven.plugin.version>6.1.2.Final</bootable.jar.maven.plugin.version>
-    <jboss.xp.galleon.feature.pack.version>27.0.0.Beta1-SNAPSHOT</jboss.xp.galleon.feature.pack.version>
-    <jboss.xp.galleon.feature.pack.groupid>org.wildfly</jboss.xp.galleon.feature.pack.groupid>
-    <jboss.version>27.0.0.Beta1-SNAPSHOT</jboss.version>
+    <wildfly.galleon.feature.pack.version>27.0.0.Beta1-SNAPSHOT</wildfly.galleon.feature.pack.version>
+    <wildfly.galleon.feature.pack.groupid>org.wildfly</wildfly.galleon.feature.pack.groupid>
+    <wildfly.version>27.0.0.Beta1-SNAPSHOT</wildfly.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.spec.javax.ws.rs</groupId>
+        <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+        <version>2.0.2.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging</artifactId>
+        <version>3.4.3.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.spec.javax.ejb</groupId>
+        <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+        <version>2.0.0.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.annotation</groupId>
+        <artifactId>javax.annotation-api</artifactId>
+        <version>1.3.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <profiles>
     <profile>
-      <id>wildfly</id>
+      <id>wildfly-default</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
-      <!-- WildFly Jakarta EE 8 BOM  -->
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-            <version>2.0.2.Final</version>
-          </dependency>
-          <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-            <version>3.4.3.Final</version>
-          </dependency>
-          <!--<dependency>
-            <groupId>org.wildfly.bom</groupId>
-            <artifactId>wildfly-jakartaee8</artifactId>
-            <version>${jboss.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-          </dependency>-->
-        </dependencies>
-      </dependencyManagement>
     </profile>
-    <!--<profile>
-      <id>eap</id>
+    <profile>
+      <id>wildfly-local-infinispan</id>
       <activation>
         <property>
-          <name>eap</name>
+          <name>infinispan.location</name>
+          <value>local</value>
         </property>
       </activation>
-      <properties>
-        <bootable.jar.maven.plugin.version>2.0.2.Final-redhat-00001</bootable.jar.maven.plugin.version>
-        <jboss.xp.galleon.feature.pack.version>2.0.0.GA-redhat-00002</jboss.xp.galleon.feature.pack.version>
-        <jboss.xp.galleon.feature.pack.groupid>org.jboss.eap</jboss.xp.galleon.feature.pack.groupid>
-        <jboss.version>7.3.4.GA</jboss.version>
-      </properties>
-      &lt;!&ndash; JBoss Maven repos &ndash;&gt;
-      <repositories>
-        <repository>
-          <id>jboss</id>
-          <url>https://maven.repository.redhat.com/ga</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-      <pluginRepositories>
-        <pluginRepository>
-          <id>jboss</id>
-          <url>https://maven.repository.redhat.com/ga</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </pluginRepository>
-      </pluginRepositories>
-      &lt;!&ndash; JBoss Jakarta EE 8 BOM &ndash;&gt;
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.jboss.bom</groupId>
-            <artifactId>jboss-eap-jakartaee8</artifactId>
-            <version>${jboss.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>-->
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-jar-maven-plugin</artifactId>
+            <version>${bootable.jar.maven.plugin.version}</version>
+            <configuration combine.children="append">
+              <cli-sessions>
+                <cli-session>
+                  <script-files>
+                    <script>scripts/distributed-timers-local-infinispan.cli</script>
+                  </script-files>
+                </cli-session>
+              </cli-sessions>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>wildfly-remote-infinispan</id>
+      <activation>
+        <property>
+          <name>infinispan.location</name>
+          <value>remote</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-jar-maven-plugin</artifactId>
+            <version>${bootable.jar.maven.plugin.version}</version>
+            <configuration combine.children="append">
+              <cli-sessions>
+                <cli-session>
+                  <script-files>
+                    <script>scripts/distributed-timers-remote-infinispan.cli</script>
+                  </script-files>
+                </cli-session>
+              </cli-sessions>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <dependencies>
@@ -120,6 +133,16 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.spec.javax.ejb</groupId>
+      <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
@@ -129,37 +152,32 @@
 
   <build>
     <finalName>ditributed-ejb-timers</finalName>
-<!--    <plugins>-->
-<!--      <plugin>-->
-<!--        <groupId>org.wildfly.plugins</groupId>-->
-<!--        <artifactId>wildfly-jar-maven-plugin</artifactId>-->
-<!--        <version>${bootable.jar.maven.plugin.version}</version>-->
-<!--        <configuration>-->
-<!--          <feature-packs>-->
-<!--            <feature-pack>-->
-<!--              <location>${jboss.xp.galleon.feature.pack.groupid}:wildfly-galleon-pack:${jboss.xp.galleon.feature.pack.version}</location>-->
-<!--            </feature-pack>-->
-<!--          </feature-packs>-->
-<!--          <layers>-->
-<!--            <layer>jaxrs-server</layer>-->
-<!--          </layers>-->
-<!--          &lt;!&ndash;<cli-sessions>-->
-<!--            <cli-session>-->
-<!--              <script-files>-->
-<!--                <script>scripts/logging.cli</script>-->
-<!--              </script-files>-->
-<!--            </cli-session>-->
-<!--          </cli-sessions>&ndash;&gt;-->
-<!--        </configuration>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <goals>-->
-<!--              <goal>package</goal>-->
-<!--            </goals>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
-<!--    </plugins>-->
+    <plugins>
+      <plugin>
+        <groupId>org.wildfly.plugins</groupId>
+        <artifactId>wildfly-jar-maven-plugin</artifactId>
+        <version>${bootable.jar.maven.plugin.version}</version>
+        <configuration>
+          <feature-packs>
+            <feature-pack>
+              <location>${wildfly.galleon.feature.pack.groupid}:wildfly-galleon-pack:${wildfly.galleon.feature.pack.version}</location>
+            </feature-pack>
+          </feature-packs>
+          <layers>
+            <layer>jaxrs-server</layer>
+            <layer>ejb</layer>
+            <layer>ejb-dist-cache</layer>
+          </layers>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>package</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
 
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>

@@ -1,0 +1,19 @@
+batch
+ /socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=infinispan-server:add(port=11222,host=127.0.0.1)
+ /subsystem=infinispan/remote-cache-container=ejb:add(default-remote-cluster=infinispan-server-cluster, tcp-keep-alive=true, marshaller=PROTOSTREAM, module=org.wildfly.clustering.ejb.infinispan, properties={infinispan.client.hotrod.auth_username=admin, infinispan.client.hotrod.auth_password=password}, statistics-enabled=true)
+ /subsystem=infinispan/remote-cache-container=ejb/remote-cluster=infinispan-server-cluster:add(socket-bindings=[infinispan-server])
+run-batch
+
+/subsystem=infinispan/cache-container=ejb/invalidation-cache=hotrod-persistent:add
+/subsystem=infinispan/cache-container=ejb/invalidation-cache=hotrod-persistent/component=expiration:add(interval=0)
+/subsystem=infinispan/cache-container=ejb/invalidation-cache=hotrod-persistent/component=locking:add(isolation=REPEATABLE_READ)
+/subsystem=infinispan/cache-container=ejb/invalidation-cache=hotrod-persistent/component=transaction:add(mode=BATCH)
+/subsystem=infinispan/cache-container=ejb/invalidation-cache=hotrod-persistent/store=hotrod:add(remote-cache-container=ejb, fetch-state=false, purge=false, passivation=false, shared=true)
+#/subsystem=infinispan/cache-container=ejb/invalidation-cache=hotrod-persistent/store=hotrod:add(remote-cache-container=ejb, cache-configuration=default, fetch-state=false, purge=false, passivation=false, shared=true)
+
+/subsystem=distributable-ejb/infinispan-timer-management=hotrod:add(cache-container=ejb, cache=hotrod-persistent)
+
+batch
+ /subsystem=ejb3/service=timer-service:undefine-attribute(name=default-data-store)
+ /subsystem=ejb3/service=timer-service:write-attribute(name=default-persistent-timer-management, value=hotrod)
+run-batch

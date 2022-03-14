@@ -1,0 +1,4 @@
+batch
+ /subsystem=ejb3/service=timer-service:undefine-attribute(name=default-data-store)
+ /subsystem=ejb3/service=timer-service:write-attribute(name=default-persistent-timer-management, value=persistent)
+run-batch
