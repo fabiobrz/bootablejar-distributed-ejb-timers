@@ -1,0 +1,14 @@
+build:
+  uri: https://github.com/wildfly-extras/wildfly-jar-maven-plugin.git
+  ref: 7.0.1.Final
+  contextDir: examples
+  mode: bootable-jar
+  env:
+    - name: MAVEN_ARGS_APPEND
+      # The -P openshift profile is activated by default when the OpenJDK builder image is used, so no need to pass it
+      # for OpenShift deployment.
+      value: -pl ejb-persistent-clustered-timers/ -am
+    - name: ARTIFACT_DIR
+      value: ejb-persistent-clustered-timers/target
+deploy:
+  replicas: 2
